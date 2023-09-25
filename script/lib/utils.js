@@ -72,6 +72,20 @@ async function handleGitCall (args, gitDir) {
   }
 }
 
+function getBuildtoolsExecutable (name) {
+  const buildtools = path.resolve(path.join(ELECTRON_DIR, '..', 'buildtools'));
+  const chromiumPlatform = {
+    darwin: 'mac',
+    linux: 'linux64',
+    win32: 'win'
+  }[process.platform];
+  let executablePath = path.join(buildtools, chromiumPlatform, name);
+  if (process.platform === 'win32') {
+    executablePath += '.exe';
+  }
+  return executablePath;
+}
+
 async function getCurrentBranch (gitDir) {
   const RELEASE_BRANCH_PATTERN = /^\d+-x-y$/;
   const MAIN_BRANCH_PATTERN = /^main$/;
@@ -147,6 +161,7 @@ async function findMatchingFiles (top, test) {
 module.exports = {
   chunkFilenames,
   findMatchingFiles,
+  getBuildtoolsExecutable,
   getCurrentBranch,
   getElectronExec,
   getOutDir,

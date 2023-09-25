@@ -1,22 +1,18 @@
 const { spawnSync } = require('node:child_process');
 const path = require('node:path');
 
+const { ELECTRON_DIR, getBuildtoolsExecutable, getOutDir } = require('./utils');
+
+// Print the value of electron_version gn arg.
 module.exports.getElectronVersion = () => {
-  // Find the nearest tag to the current HEAD
-  // This is equivilant to our old logic of "use a value in package.json" for the following reasons
-  //
-  // 1. Whenever we updated the package.json we ALSO pushed a tag with the same version
-  // 2. Whenever we _reverted_ a bump all we actually did was push a commit that deleted the tag and changed the version number back
-  //
-  // The only difference in the "git describe" technique is that technically a commit can "change" it's version
-  // number if a tag is created / removed retroactively.  i.e. the first time a commit is pushed it will be 1.2.3
-  // and after the tag is made rebuilding the same commit will result in it being 1.2.4
-  const output = spawnSync('git', ['describe', '--tags', '--abbrev=0'], {
-    cwd: path.resolve(__dirname, '..', '..')
-  });
+  // Execute "gn args" to receive arg info.
+  const gn = getBuildtoolsExecutable('gn');
+  const outDir = path.resolve(ELECTRON_DIR, '..', 'out', getOutDir());
+  const output = spawnSync(gn, ['args', outDir, '--list=electron_version', '--short', '--json']);
   if (output.status !== 0) {
-    console.error(output.stderr);
-    throw new Error('Failed to get current electron version');
+    throw new Error(`Failed to get electron_version arg: ${output.stdout}`);
   }
-  return output.stdout.toString().trim().replace(/^v/g, '');
+  // Parse the arg value.
+  const version = JSON.parse(output.stdout)[0];
+  if (version.current) { return version.current.value; } else { return version.default.value; }
 };

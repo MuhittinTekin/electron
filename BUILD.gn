@@ -104,14 +104,6 @@ branding = read_file("shell/app/BRANDING.json", "json")
 electron_project_name = branding.project_name
 electron_product_name = branding.product_name
 electron_mac_bundle_id = branding.mac_bundle_id
-electron_version = exec_script("script/print-version.py",
-                               [],
-                               "trim string",
-                               [
-                                 ".git/packed-refs",
-                                 ".git/HEAD",
-                                 "script/lib/get-version.js",
-                               ])
 
 if (is_mas_build) {
   assert(is_mac,

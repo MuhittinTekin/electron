@@ -18,4 +18,15 @@ declare_args() {
 
   # Enable Spellchecker support
   enable_builtin_spellchecker = true
+
+  # The version of Electron.
+  # Packagers and vendor builders should set the version string in the args
+  # passed to the gn binary.
+  electron_version = exec_script("//electron/script/get-git-version.py",
+                                 [],
+                                 "trim string",
+                                 [
+                                   ".git/packed-refs",
+                                   ".git/HEAD",
+                                 ])
 }
